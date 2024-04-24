@@ -1,4 +1,5 @@
 import itertools
+from collections.abc import Mapping
 
 import requests
 from PIL import Image
@@ -7,7 +8,7 @@ from geopy.geocoders import Nominatim
 import multiprocessing
 
 
-def download(url, headers):
+def download(url, headers: Mapping[str, str | bytes]):
     point_url = MapillaryAPI.METADATA_ENDPOINT + (f"/{url['id']}"
                                                   f"?fields=id,thumb_original_url,captured_at,geometry")
     point_response = requests.get(point_url, headers=headers)
@@ -22,7 +23,7 @@ def download(url, headers):
 class MapillaryResponse:
     __GEOLOCATOR = Nominatim(user_agent="geoguessr_ai")
 
-    def __init__(self, id, url, image, timestamp, geometry):
+    def __init__(self, id, url, image: Image, timestamp, geometry):
         self.id = id
         self.url = url
         self.image = image
@@ -48,16 +49,15 @@ class MapillaryResponse:
 class MapillaryAPI:
     METADATA_ENDPOINT = "https://graph.mapillary.com"
 
-    def __init__(self, token):
+    def __init__(self, token: str):
         self.__token = token
         self.__headers = {"Authorization": "OAuth {}".format(token)}
 
     def search(self,
-               latitude_degrees, longitude_degrees,
-               latitude_distance_degrees, longitude_distance_degrees,
-               *, amount=-1, parallels=None) \
+               latitude_degrees: float, longitude_degrees: float,
+               latitude_distance_degrees: float, longitude_distance_degrees: float,
+               *, amount: int = -1, parallels: int = None) \
             -> list[MapillaryResponse]:
-
         url_imagesearch = (self.METADATA_ENDPOINT + '/images?fields=id&bbox={},{},{},{}'
                            .format(longitude_degrees - longitude_distance_degrees,
                                    latitude_degrees - latitude_distance_degrees,
