@@ -1,5 +1,6 @@
 from geopy.geocoders import Nominatim
 from PIL import Image
+from geo.location import Location
 
 
 class MapillaryResponse:
@@ -15,14 +16,14 @@ class MapillaryResponse:
     def get_picture(self) -> Image:
         return self.image
 
-    def get_coordinates(self) -> tuple[int, int]:
+    def get_location(self) -> Location:
         if self.geometry['type'] != 'Point':
-            return 0, 0
+            return Location.zero()
         coordinates = self.geometry['coordinates']
-        coordinates.reverse()
-        return tuple[int, int](coordinates)
+        latitude = coordinates[1]
+        longitude = coordinates[0]
+        return Location.from_degrees(latitude, longitude)
 
     def get_address(self) -> str:
-        coordinates = list(self.get_coordinates())
-        coordinates.reverse()
-        return self.__GEOLOCATOR.reverse(coordinates)
+        location = self.get_location()
+        return self.__GEOLOCATOR.reverse(location)
