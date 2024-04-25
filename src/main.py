@@ -1,9 +1,9 @@
-from mapillary_api import *
 from sys import argv
+from geo import *
 
 
 def main():
-    api = MapillaryAPI(argv[1])
+    api = mapillary_api.MapillaryAPI(argv[1])
     # Somewhere in Heidelberg, Germany
     responses = api.search(49.395665034392536, 8.599463334284934,
                            0.00025, 0.00025, parallels=20)
