@@ -17,10 +17,10 @@ class MapillaryAPI:
 
     def _download(self, id):
         point_url = MapillaryAPI.METADATA_ENDPOINT + (f"/{id}"
-                                                      f"?fields=id,thumb_original_url,captured_at,geometry")
+                                                      f"?fields=id,thumb_1024_url,captured_at,geometry")
         point_response = requests.get(point_url, headers=self.__headers)
         point_json = point_response.json()
-        image_url = point_json['thumb_original_url']
+        image_url = point_json['thumb_1024_url']
         image_content = requests.get(image_url).content
         image = Image.open(io.BytesIO(image_content)).convert('RGBA')
         return MapillaryResponse(point_json['id'], image_url, image,
@@ -72,6 +72,22 @@ class MapillaryAPI:
         :param verbose: Verbose console log
         :return: List of ids in list[str] form
         """
+        return [x for xs in self.parallel_search_mapped_ids(
+            radial_boundaries, parallels=parallels, chunksize=chunksize, maximum=maximum, verbose=verbose
+        ) for x in xs]
+
+    def parallel_search_mapped_ids(self, radial_boundaries: list[tuple[Location, Location]], *,
+                                   parallels: int | None = None,
+                                   chunksize: int = 1, maximum: int | None = None, verbose: bool = False):
+        """
+        Parallel mapped search for IDS in specified bounds
+        :param radial_boundaries: Tuple of structure (center, radius)
+        :param parallels: How many search threads at maximum
+        :param chunksize: How many searches per thread at minimum
+        :param maximum: The maximum ids to return
+        :param verbose: Verbose console log
+        :return: List of ids in list[str] form
+        """
         urls = []
         with multiprocessing.Pool(processes=parallels) as pool:
             if verbose:
@@ -86,7 +102,7 @@ class MapillaryAPI:
                                     chunksize=chunksize)
         if len(urls) <= 0:
             return []
-        return [x for xs in urls for x in xs]
+        return urls
 
     def _search_ids(self, radial_bounds, maximum, verbose):
         return self.search_ids(radial_bounds, maximum=maximum, verbose=verbose)
