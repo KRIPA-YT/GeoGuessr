@@ -27,12 +27,12 @@ class Location:
     def longitude_degrees(self):
         return self.__longitude_degrees
 
-    def __str__(self):
-        latitude_sign, latitude_degrees, latitude_minutes, latitude_seconds\
+    def __repr(self):
+        latitude_sign, latitude_degrees, latitude_minutes, latitude_seconds \
             = self.__unsigned_decimal_degrees_to_dms(self.latitude_degrees)
-        longitude_sign, longitude_degrees, longitude_minutes, longitude_seconds\
+        longitude_sign, longitude_degrees, longitude_minutes, longitude_seconds \
             = self.__unsigned_decimal_degrees_to_dms(self.longitude_degrees)
-        return (f"{latitude_degrees:.0f}°{ latitude_minutes:.0f}'"
+        return (f"{latitude_degrees:.0f}°{latitude_minutes:.0f}'"
                 f"{latitude_seconds:.2f}\"{'N' if latitude_sign else 'S'} "
                 f"{longitude_degrees:.0f}°{longitude_minutes:.0f}'"
                 f"{longitude_seconds:.2f}\"{'E' if longitude_sign else 'W'}")
