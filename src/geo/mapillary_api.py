@@ -131,6 +131,8 @@ class MapillaryAPI:
         if not imagesearch_json or len(imagesearch_json) <= 0:  # If response is empty or no hits:
             return []
 
+        if 'data' not in imagesearch_json:
+            return []
         maximum = len(imagesearch_json['data']) if maximum is None else maximum
         return [data['id'] for data in imagesearch_json['data'][:maximum]]
 

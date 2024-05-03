@@ -27,7 +27,7 @@ class Location:
     def longitude_degrees(self):
         return self.__longitude_degrees
 
-    def __repr(self):
+    def __repr__(self):
         latitude_sign, latitude_degrees, latitude_minutes, latitude_seconds \
             = self.__unsigned_decimal_degrees_to_dms(self.latitude_degrees)
         longitude_sign, longitude_degrees, longitude_minutes, longitude_seconds \
