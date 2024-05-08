@@ -1,3 +1,5 @@
+import re
+
 class Location:
     __create_key = object()
 
@@ -5,6 +7,21 @@ class Location:
     def from_degrees(cls, latitude, longitude):
         return Location(cls.__create_key, latitude, longitude)
 
+    @classmethod
+    def from_string(cls, string):
+        dms = re.search('((\d*)°(\d*)\'([\d\.]*)\")[NS]( )*((\d*)°(\d*)\'([\d\.]*)\")[EW]', string)
+        if dms:
+            coordinates = re.findall('((\d*\.)?\d+)', string)
+            coordinates = [coordinate[0] for coordinate in coordinates]
+            lat_degrees, lat_minutes, lat_seconds, \
+            lon_degrees, lon_minutes, lon_seconds = coordinates
+            directions = re.findall('[NSEW]{1}', string)
+            lat_direction, lon_direction = directions
+            latitude = cls.__dms_to_decimal_degrees(lat_degrees, lat_minutes, lat_seconds, lat_direction)
+            longitude = cls.__dms_to_decimal_degrees(lon_degrees, lon_minutes, lon_seconds, lon_direction)
+            return cls.from_degrees(latitude, longitude)
+
+    
     @classmethod
     def zero(cls):
         return cls.from_degrees(0, 0)
@@ -43,3 +60,7 @@ class Location:
         minutes, seconds = divmod(abs(decimal_degrees) * 3600, 60)
         degrees, minutes = divmod(minutes, 60)
         return sign, degrees, minutes, seconds
+
+    @staticmethod
+    def __dms_to_decimal_degrees(degrees, minutes, seconds, direction):
+        return (float(degrees) + float(minutes)/60 + float(seconds)/(60*60)) * (-1 if direction in ['W', 'S'] else 1)
