@@ -1,6 +1,6 @@
 from geopy.geocoders import Nominatim
 from PIL import Image
-from geo.location import Location
+from mapillary.location import Location
 
 
 class MapillaryResponse:
