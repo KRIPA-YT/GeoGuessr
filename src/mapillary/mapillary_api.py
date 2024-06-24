@@ -16,7 +16,6 @@ class MapillaryAPI:
         self.__headers = {"Authorization": "OAuth {}".format(token)}
 
     def _download(self, id):
-        print(f"Starting download ID={id}")
         point_url = MapillaryAPI.METADATA_ENDPOINT + (f"/{id}"
                                                       f"?fields=id,thumb_1024_url,captured_at,geometry")
         point_response = requests.get(point_url, headers=self.__headers)
@@ -24,7 +23,6 @@ class MapillaryAPI:
         image_url = point_json['thumb_1024_url']
         image_content = requests.get(image_url).content
         image = Image.open(io.BytesIO(image_content)).convert('RGBA')
-        print(f"Finished download ID={id}")
         return MapillaryResponse(point_json['id'], image_url, image,
                                  point_json['captured_at'], point_json['geometry'])
 
