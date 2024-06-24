@@ -3,8 +3,8 @@ import requests
 from PIL import Image
 import io
 import multiprocessing
-from geo.mapillary_response import MapillaryResponse
-from geo.location import Location
+from mapillary.mapillary_response import MapillaryResponse
+from mapillary.location import Location
 import tqdm
 
 
@@ -16,6 +16,7 @@ class MapillaryAPI:
         self.__headers = {"Authorization": "OAuth {}".format(token)}
 
     def _download(self, id):
+        print(f"Starting download ID={id}")
         point_url = MapillaryAPI.METADATA_ENDPOINT + (f"/{id}"
                                                       f"?fields=id,thumb_1024_url,captured_at,geometry")
         point_response = requests.get(point_url, headers=self.__headers)
@@ -23,6 +24,7 @@ class MapillaryAPI:
         image_url = point_json['thumb_1024_url']
         image_content = requests.get(image_url).content
         image = Image.open(io.BytesIO(image_content)).convert('RGBA')
+        print(f"Finished download ID={id}")
         return MapillaryResponse(point_json['id'], image_url, image,
                                  point_json['captured_at'], point_json['geometry'])
 
@@ -153,6 +155,7 @@ class MapillaryAPI:
                                        total=len(ids), unit='img', colour='green'):
                     images.append(image)
             else:
-                images = pool.imap_unordered(self._download, ids, chunksize=chunksize)
+                for image in pool.imap_unordered(self._download, ids, chunksize=chunksize):
+                    images.append(image)
 
         return images
