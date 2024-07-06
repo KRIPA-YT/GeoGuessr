@@ -1,4 +1,7 @@
+import math
 import re
+from typing import Self
+
 
 class Location:
     __create_key = object()
@@ -14,14 +17,13 @@ class Location:
             coordinates = re.findall('((\d*\.)?\d+)', string)
             coordinates = [coordinate[0] for coordinate in coordinates]
             lat_degrees, lat_minutes, lat_seconds, \
-            lon_degrees, lon_minutes, lon_seconds = coordinates
+                lon_degrees, lon_minutes, lon_seconds = coordinates
             directions = re.findall('[NSEW]{1}', string)
             lat_direction, lon_direction = directions
             latitude = cls.__dms_to_decimal_degrees(lat_degrees, lat_minutes, lat_seconds, lat_direction)
             longitude = cls.__dms_to_decimal_degrees(lon_degrees, lon_minutes, lon_seconds, lon_direction)
             return cls.from_degrees(latitude, longitude)
 
-    
     @classmethod
     def zero(cls):
         return cls.from_degrees(0, 0)
@@ -54,6 +56,18 @@ class Location:
                 f"{longitude_degrees:.0f}°{longitude_minutes:.0f}'"
                 f"{longitude_seconds:.2f}\"{'E' if longitude_sign else 'W'}")
 
+    def distance_km(self, other: Self):
+        earth_radius_km = 6371
+        difference_lat = math.radians(other.latitude_degrees - self.latitude_degrees)
+        difference_lon = math.radians(other.longitude_degrees - self.longitude_degrees)
+        a = (math.sin(difference_lat / 2) * math.sin(difference_lat / 2)
+             + math.cos(math.radians(self.latitude_degrees)) * math.cos(math.radians(other.latitude_degrees))
+             * math.sin(difference_lon / 2) * math.sin(difference_lon / 2))
+
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        distance = earth_radius_km * c
+        return distance
+
     @staticmethod
     def __unsigned_decimal_degrees_to_dms(decimal_degrees):
         sign = decimal_degrees > 0
@@ -63,4 +77,5 @@ class Location:
 
     @staticmethod
     def __dms_to_decimal_degrees(degrees, minutes, seconds, direction):
-        return (float(degrees) + float(minutes)/60 + float(seconds)/(60*60)) * (-1 if direction in ['W', 'S'] else 1)
+        return (float(degrees) + float(minutes) / 60 + float(seconds) / (60 * 60)) * (
+            -1 if direction in ['W', 'S'] else 1)
